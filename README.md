@@ -366,12 +366,6 @@ The tool asks what kind of server you have and runs extra tests accordingly:
 
 ## ⚠️ **Good to Know**
 
-### **Safety First**
-- ✅ **Read-Only** - This tool only reads your system, never changes anything
-- ✅ **No External Calls** - Doesn't send data anywhere or make internet requests
-- ✅ **Production Safe** - You can safely run this on live servers
-- ✅ **Logged Results** - Everything gets saved to a report file for you
-
 ### **Keep in Mind**
 - You'll get better results if you run it with sudo/root
 - These results are a starting point - consider getting professional advice for critical systems
