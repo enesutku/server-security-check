@@ -4,14 +4,14 @@ A helpful security testing tool for Ubuntu/Linux servers that checks your system
 
 ## ⭐ **Quick Start**
 
-#### **🚀 One-Line Installation & Execution:**
-```bash
-curl -sSL https://raw.githubusercontent.com/enesutku/server-security-check/main/server-security-check.sh | sudo bash
-```
-
-#### **📥 Download, Make Executable & Run:**
+#### **🚀 One-Line Installation & Execution & Run:**
 ```bash
 wget -O security_check.sh https://raw.githubusercontent.com/enesutku/server-security-check/main/server-security-check.sh && chmod +x security_check.sh && sudo ./security_check.sh
+```
+
+#### **📥 Download, Make Executable:**
+```bash
+wget -O security_check.sh https://raw.githubusercontent.com/enesutku/server-security-check/main/server-security-check.sh && chmod +x security_check.sh
 ```
 
 #### **🔧 Manual Installation:**
