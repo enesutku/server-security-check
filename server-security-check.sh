@@ -3813,6 +3813,22 @@ show_detailed_results() {
     fi
 }
 
+# Safety timeout - Script will exit after MAX_RUNTIME seconds
+MAX_RUNTIME=900  # 30 minutes maximum
+SCRIPT_START_TIME=$(date +%s)
+
+# Function to check if script should timeout
+check_timeout() {
+    current_time=$(date +%s)
+    runtime=$((current_time - SCRIPT_START_TIME))
+    if [ $runtime -gt $MAX_RUNTIME ]; then
+        echo ""
+        echo "⚠️  Script timeout reached ($MAX_RUNTIME seconds). Exiting for safety..."
+        echo "This prevents infinite execution. Results saved to: $REPORT_FILE"
+        exit 0
+    fi
+}
+
 # Main execution
 main() {
     # Check if running as root
@@ -3820,11 +3836,23 @@ main() {
         echo "Warning: This script should be run as root for complete testing."
         echo "Some tests may not work properly without root privileges."
         echo ""
-        read -p "Continue anyway? (y/N): " choice
-        case "$choice" in
-            y|Y ) ;;
-            * ) echo "Exiting..."; exit 1;;
-        esac
+        
+        # Non-interactive mode check
+        if [ ! -t 0 ] || [ ! -t 1 ]; then
+            echo "Non-interactive mode: Continuing without root privileges..."
+        else
+            printf "Continue anyway? (y/N): "
+            if read -t 10 choice 2>/dev/null; then
+                case "$choice" in
+                    y|Y ) ;;
+                    * ) echo "Exiting..."; exit 1;;
+                esac
+            else
+                echo ""
+                echo "Input timeout - Exiting for safety..."
+                exit 1
+            fi
+        fi
     fi
     
     select_server_type
@@ -3837,6 +3865,9 @@ main() {
     printf "\033[1;36m║\033[0;33m                    (Applied to ALL server types)                 \033[1;36m║\033[0m\n"
     printf "\033[1;36m╚══════════════════════════════════════════════════════════════════╝\033[0m\n"
     echo ""
+    
+    # Safety check
+    check_timeout
     
     test_system_info
     test_user_authentication
@@ -3875,6 +3906,9 @@ main() {
         printf "\033[1;35m║\033[0;33m                Specific tests for your selected type             \033[1;35m║\033[0m\n"
         printf "\033[1;35m╚══════════════════════════════════════════════════════════════════╝\033[0m\n"
         echo ""
+        
+        # Safety check before specialized tests
+        check_timeout
         
         run_specialized_tests
     else
