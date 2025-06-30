@@ -43,6 +43,13 @@ show_loading() {
 
 # Server type selection
 select_server_type() {
+    # Check if running in non-interactive mode (no TTY)
+    if [ ! -t 0 ] || [ ! -t 1 ]; then
+        echo "Non-interactive mode detected. Using General Server as default."
+        SERVER_TYPE="general"
+        return
+    fi
+    
     clear
     printf "\033[0;35m╔══════════════════════════════════════════════════════════════════╗\033[0m\n"
     printf "\033[0;35m║\033[1;37m                      SERVER SECURITY ANALYSIS                    \033[0;35m║\033[0m\n"
@@ -59,19 +66,42 @@ select_server_type() {
     printf "\033[1;32m6)\033[0m \033[1;37mFile Server\033[0m     \033[0;33m(Samba, NFS, file sharing)\033[0m\n"
     echo ""
     
-    while true; do
+    # Timeout mechanism for safety
+    attempts=0
+    max_attempts=5
+    
+    while [ $attempts -lt $max_attempts ]; do
         printf "\033[1;36mEnter your choice (1-6): \033[0m"
-        read choice
-        case $choice in
-            1) SERVER_TYPE="general"; break;;
-            2) SERVER_TYPE="web"; break;;
-            3) SERVER_TYPE="database"; break;;
-            4) SERVER_TYPE="mail"; break;;
-            5) SERVER_TYPE="dns"; break;;
-            6) SERVER_TYPE="file"; break;;
-            *) printf "\033[0;31mInvalid choice. Please enter 1-6.\033[0m\n";;
-        esac
+        
+        # Use timeout and check if read succeeds
+        if read -t 30 choice 2>/dev/null; then
+            case $choice in
+                1) SERVER_TYPE="general"; break;;
+                2) SERVER_TYPE="web"; break;;
+                3) SERVER_TYPE="database"; break;;
+                4) SERVER_TYPE="mail"; break;;
+                5) SERVER_TYPE="dns"; break;;
+                6) SERVER_TYPE="file"; break;;
+                *) 
+                    printf "\033[0;31mInvalid choice. Please enter 1-6.\033[0m\n"
+                    attempts=$((attempts + 1))
+                    ;;
+            esac
+        else
+            # If read fails or times out, default to general
+            echo ""
+            echo "Input timeout or error detected. Using General Server as default."
+            SERVER_TYPE="general"
+            break
+        fi
     done
+    
+    # If too many attempts, default to general
+    if [ $attempts -eq $max_attempts ]; then
+        echo ""
+        echo "Too many invalid attempts. Using General Server as default."
+        SERVER_TYPE="general"
+    fi
     
     echo ""
     printf "\033[1;32m✓ Selected server type: \033[1;37m$SERVER_TYPE\033[0m\n"
